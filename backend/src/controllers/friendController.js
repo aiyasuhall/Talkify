@@ -51,7 +51,7 @@ export const sendFriendRequest = async (req, res) => {
             message
         });
 
-        return res.status(201).json({mesage: "Sending friend request successfully.", request})
+        return res.status(201).json({message: "Sending friend request successfully.", request})
     } catch (error) {
         console.error("Error to send add friend request.", error);
         return res.status(500).json({ message: "System error." })
@@ -135,8 +135,8 @@ export const getAllFriends = async (req, res) => {
                 },
             ]
         })
-            .populate("userA", "_id displayName avatarUrl")
-            .populate("userB", "_id displayName avatarUrl")
+            .populate("userA", "_id displayName avatarUrl username")
+            .populate("userB", "_id displayName avatarUrl username")
             .lean();
         
         if (!friendships.length) {
