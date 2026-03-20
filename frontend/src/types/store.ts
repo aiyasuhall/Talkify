@@ -45,13 +45,13 @@ export interface ChatState{
     sendDirectMessage: (
         recipientId: string,
         content: string,
-        imgUrl?: string
+        imageFile?: File
     ) => Promise<void>;
 
     sendGroupMessage: (
         conversationId: string,
         content: string,
-        imgUrl?: string
+        imageFile?: File
     ) => Promise<void>;
 
     // add message
@@ -66,6 +66,12 @@ export interface ChatState{
     addConvo: (convo: Conversation) => void;
 
     createConversation: (type: "direct" | "group", name: string, memberIds: string[]) => Promise<void>;
+
+    renameConversation: (conversationId: string, newName: string, targetUserId?: string) => Promise<void>;
+
+    deleteConversation: (conversationId: string) => Promise<void>;
+
+    updateConversationNameLocally: (conversationId: string, newName: string, targetUserId?: string) => void;
 };
 
 export interface SocketState {
@@ -88,6 +94,27 @@ export interface FriendState{
     getFriends: () => Promise<void>;
 };
 
-export interface UserState{
-    updateAvatarUrl: (formData: FormData) => Promise<void>;
+export interface UserState {
+  updateAvatarUrl: (formData: FormData) => Promise<void>;
+  updateProfile: (payload: {
+    displayName: string;
+    email: string;
+    phone?: string;
+    bio?: string;
+  }) => Promise<void>;
+  updatePreferences: (payload: { showOnlineStatus: boolean }) => Promise<void>;
+  changePassword: (payload: { currentPassword: string; newPassword: string }) => Promise<void>;
+  blockUserByUsername: (username: string) => Promise<void>;
+  getBlockedUsers: (
+    page?: number,
+    limit?: number
+    ) => Promise<{
+    blockedUsers: Friend[];
+    total: number;
+    page: number;
+    limit: number;
+    hasMore: boolean;
+    }>;
+  unblockUser: (targetUserId: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
 }

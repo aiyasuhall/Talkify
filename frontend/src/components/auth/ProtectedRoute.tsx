@@ -34,13 +34,13 @@ const ProtectedRoute = () => {
   if (!accessToken) {
     return (
       <Navigate
-        to="/signin"
+        to="/"
         replace
       />
     );
   }
 
-  return <Outlet></Outlet>;
+  return <Outlet/>;
 };
 
 export default ProtectedRoute;

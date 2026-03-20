@@ -30,7 +30,11 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
     otherUser = otherUsers.length > 0 ? otherUsers[0] : null;
 
     if (!user || !otherUser) return;
-    }
+  }
+  
+  const displayChatName = chat.type === "direct" 
+    ? (chat.nicknames?.[otherUser?._id ?? ""] || otherUser?.displayName) 
+    : chat.group?.name;
 
   return (
     <header className="sticky top-0 z-10 px-4 py-2 flex items-center bg-background">
@@ -67,7 +71,7 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
 
           {/* hiển thị tên */}
           <h2 className="font-semibold text-foreground">
-            {chat.type === "direct" ? otherUser?.displayName : chat.group?.name}
+            {displayChatName}
           </h2>
         </div>
       </div>

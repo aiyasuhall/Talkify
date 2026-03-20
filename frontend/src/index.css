@@ -7,38 +7,38 @@
 @layer base {
   :root {
     /* Base colors - soft pastels */
-    --background: 0 0% 100%; /*violet-50*/
+    --background: 0 0% 100%;
     --foreground: 217.2 32.6% 17.5%; /* slate-800 */
 
     /* Card system */
-    --card: 250 100% 99%;
+    --card: 145 20% 99%; /* Chút ánh xanh lá nhạt cho card */
     --card-foreground: 217.2 32.6% 17.5%;
 
     /* Popover system */
-    --popover: 250 100% 99%;
+    --popover: 145 20% 99%;
     --popover-foreground: 240 15% 15%;
 
     /* Primary */
-    /* Tím */
-    --primary: 271 79% 47%;
-    --primary-foreground: 210 40% 96.1%; /*slate-100*/
-    /* Hồng */
-    --primary-glow: 320 100% 70%;
+    /* Xanh lá đậm */
+    --primary: 145 80% 40%;
+    --primary-foreground: 0 0% 100%; /*slate-100*/
+    /* Xanh lá sáng (Mint) cho hiệu ứng glow */
+    --primary-glow: 145 100% 60%;
 
-    /* Secondary - lavender */
-    --secondary: 270 50% 92%;
-    --secondary-foreground: 280 100% 40%;
+    /* Secondary - Mint nhạt */
+    --secondary: 145 50% 92%;
+    --secondary-foreground: 145 100% 30%;
 
     /* Muted */
-    --muted: 260 30% 95%;
+    --muted: 145 30% 95%;
     --muted-foreground: 240 15% 50%;
 
-    /* Accent - cyan */
+    /* Accent - cyan (giữ nguyên hoặc xanh lơ) */
     --accent: 180 100% 75%;
     --accent-foreground: 240 100% 15%;
 
     /* Chat colors */
-    --chat-bubble-sent: 271 79% 47%;
+    --chat-bubble-sent: 145 80% 40%;
     --chat-bubble-sent-foreground: 0 0% 100%;
     --chat-bubble-received: 0 0% 96%;
     --chat-bubble-received-foreground: 240 15% 15%;
@@ -60,9 +60,9 @@
     --destructive-foreground: 0 0% 100%;
 
     /* Border and input */
-    --border: 282 16% 87%;
-    --input: 260 30% 92%;
-    --ring: 271 79% 47%;
+    --border: 145 20% 87%;
+    --input: 145 30% 92%;
+    --ring: 145 80% 40%;
 
     /* Design system values */
     --radius: 1rem;
@@ -75,8 +75,8 @@
     );
     --gradient-chat: linear-gradient(
       135deg,
-      hsl(280, 100%, 65%),
-      hsl(320, 100%, 70%)
+      hsl(140, 100%, 40%),  /* Xanh lá đậm vừa */
+      hsl(155, 100%, 45%)   /* Xanh ngả mint */
     );
     --gradient-accent: linear-gradient(
       90deg,
@@ -86,38 +86,31 @@
 
     --gradient-glass: linear-gradient(
       135deg,
-      hsl(250, 100%, 98%) 0%,
-      hsl(260, 50%, 96%) 100%
+      hsl(145, 100%, 98%) 0%,
+      hsl(145, 50%, 96%) 100%
     );
 
-    /* pattern craft */
+    /* pattern craft (vẫn giữ tên biến cũ để không lỗi code React, nhưng màu xanh) */
     --gradient-purple: radial-gradient(
       125% 125% at 50% 10%,
       hsla(0, 0%, 100%, 1) 40%,
-      hsla(262, 83%, 58%, 0.5) 100%
+      hsla(145, 80%, 45%, 0.5) 100%
     );
 
     /* Shadows */
-    --shadow-soft: 0 8px 32px -8px hsl(271 79% 47% / 0.15);
+    --shadow-soft: 0 8px 32px -8px hsl(145 80% 40% / 0.15);
     --shadow-glow: 0 0 40px hsl(var(--primary) / 0.3);
-    --shadow-bubble: 0 4px 20px -4px hsl(280 50% 70% / 0.2);
+    --shadow-bubble: 0 4px 20px -4px hsl(145 50% 70% / 0.2);
 
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
-
     --sidebar-foreground: 215.3 25% 26.7%; /*slate-700*/
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 145 80% 40%; /* Chuyển sang xanh */
 
     /* Scrollbar */
     .beautiful-scrollbar {
@@ -141,12 +134,14 @@
     --popover: 240 15% 12%;
     --popover-foreground: 250 100% 95%;
 
-    --primary: 280 100% 70%;
+    /* Xanh lá sáng neon trong Dark Mode */
+    --primary: 145 80% 60%;
     --primary-foreground: 240 15% 8%;
-    --primary-glow: 320 100% 80%;
+    --primary-glow: 145 100% 70%;
 
-    --secondary: 270 20% 20%;
-    --secondary-foreground: 280 100% 80%;
+    /* Secondary Dark */
+    --secondary: 145 20% 20%;
+    --secondary-foreground: 145 100% 80%;
 
     --muted: 240 15% 15%;
     --muted-foreground: 240 15% 70%;
@@ -155,7 +150,7 @@
     --accent-foreground: 240 15% 8%;
 
     /* Chat bubbles in dark mode */
-    --chat-bubble-sent: 280 100% 65%;
+    --chat-bubble-sent: 145 80% 50%;
     --chat-bubble-sent-foreground: 0 0% 100%;
     --chat-bubble-received: 240 15% 18%;
     --chat-bubble-received-foreground: 250 100% 90%;
@@ -168,20 +163,20 @@
     --destructive: 0 80% 47%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 281 15% 25%;
+    --border: 145 15% 25%;
     --input: 240 15% 18%;
-    --ring: 280 100% 70%;
+    --ring: 145 80% 60%;
 
     /* Dark mode gradients */
     --gradient-primary: linear-gradient(
       135deg,
-      hsl(280, 100%, 70%),
-      hsl(320, 100%, 80%)
+      hsl(145, 80%, 50%),
+      hsl(155, 100%, 65%)
     );
     --gradient-chat: linear-gradient(
       135deg,
-      hsl(280, 100%, 70%),
-      hsl(320, 100%, 75%)
+      hsl(145, 80%, 50%),
+      hsl(155, 100%, 60%)
     );
     --gradient-accent: linear-gradient(
       90deg,
@@ -194,25 +189,26 @@
       hsl(240, 15%, 18%) 100%
     );
 
+    /* Vẫn giữ tên biến cũ, nhưng màu đổ bóng đen/xanh lá tối */
     --gradient-purple: radial-gradient(
       125% 125% at 50% 10%,
       hsla(0, 0%, 0%, 1) 40%,
-      hsla(310, 96%, 11%, 0.5) 100%
+      hsla(145, 96%, 11%, 0.5) 100%
     );
 
-    /* Dark shadows with glow */
-    --shadow-soft: 0 8px 32px -8px hsl(280 100% 70% / 0.25);
+    /* Dark shadows with green glow */
+    --shadow-soft: 0 8px 32px -8px hsl(145 100% 50% / 0.25);
     --shadow-glow: 0 0 40px hsl(var(--primary) / 0.4);
-    --shadow-bubble: 0 4px 20px -4px hsl(280 80% 50% / 0.3);
+    --shadow-bubble: 0 4px 20px -4px hsl(145 80% 40% / 0.3);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 145 80% 50%; /* Đổi sang xanh */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 145 80% 60%;
   }
 
   body {
@@ -223,7 +219,8 @@
 /* Chat App Utility Classes */
 @layer components {
   .glass {
-    @apply bg-gradient-to-br from-violet-200/10 to-pink-100/5 border-violet-300/30;
+    /* Đã đổi violet và pink sang emerald và green nhạt */
+    @apply bg-gradient-to-br from-emerald-200/10 to-green-100/5 border-emerald-300/30;
   }
 
   .dark .glass {
@@ -277,6 +274,7 @@
     background: var(--gradient-glass);
   }
 
+  /* Tên class giữ nguyên theo file của bạn, nhưng màu hiển thị là xanh */
   .bg-gradient-purple {
     background: var(--gradient-purple);
   }

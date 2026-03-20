@@ -4,15 +4,37 @@ import type { Conversation } from '@/types/chat'
 import ChatCard from './ChatCard';
 import UnreadCountBadge from './UnreadCountBadge';
 import GroupChatAvatar from './GroupChatAvatar';
+import { cn } from "@/lib/utils";
 
 const GroupChatCard = ({ convo }: { convo: Conversation }) => {
   const { user } = useAuthStore();
-  const { activeConversationId, setActiveConversation, messages, fetchMessages } = useChatStore();
+  const { activeConversationId, setActiveConversation, messages, fetchMessages, renameConversation, deleteConversation } = useChatStore();
 
   if (!user) return null;
 
   const unreadCount = convo.unreadCounts[user._id];
   const name = convo.group?.name ?? "";
+
+  const last = convo.lastMessage as any;
+
+  const senderId =
+    last?.sender?._id ||
+    (typeof last?.senderId === "string" ? last.senderId : last?.senderId?._id) ||
+    "";
+
+  const senderDisplayName =
+    last?.sender?.displayName ||
+    convo.participants.find((p) => p._id === senderId)?.displayName ||
+    "";
+
+  const senderName = senderId
+    ? (convo.nicknames?.[senderId] || senderDisplayName || "Someone")
+    : "Someone";
+
+  const contentText = last?.content?.trim?.() ?? "";
+  const hasPhoto = Boolean(last?.imgUrl);
+  const lastMessageText = contentText || (hasPhoto ? `${senderName} sent a photo` : "");
+  
   const handleSelectConversation = async (id: string) => {
     setActiveConversation(id);
 
@@ -31,6 +53,9 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
       isActive={activeConversationId === convo._id}
       onSelect={handleSelectConversation}
       unreadCount={unreadCount}
+      chatType="group"
+      onRename={(newName) => renameConversation(convo._id, newName)} // Không cần targetUserId vì là group
+      onDelete={() => deleteConversation(convo._id)}
       leftSection={
         <>
           {unreadCount > 0 && <UnreadCountBadge unreadCount={unreadCount} />}
@@ -41,8 +66,15 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
         </>
       }
       subtitle={
-        <p className="text-sm truncate text-muted-foreground">{convo.participants.length} Members</p>
-      }
+      <p
+        className={cn(
+          "text-sm truncate",
+          unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground"
+        )}
+      >
+        {lastMessageText || `${convo.participants.length} Members`}
+      </p>
+    }
     
     />
   )

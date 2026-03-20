@@ -37,20 +37,20 @@ export function SignupForm({
     // gọi backend để signup
     await signUp(username, password, email, firstname, lastname);
 
-    navigate("/signin");
+    navigate("/");
   };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0 border-border">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
+      <Card className="overflow-hidden p-0 border-border bg-white">
+        <CardContent className="grid p-0 md:grid-cols-2 bg-white">
+          <form className="p-6 md:p-8 bg-white" onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               {/* header - logo */}
               <div className="flex flex-col items-center text-center gap-2">
                 <a href="/"
                   className="mx-auto block w-fit text-center">
-                  <img src="/logo.svg" alt="logo" />
+                  <img className="w-40 h-40 object-contain" src="/logo.svg" alt="logo" />
                 </a>
                 <h1 className="text-2xl font-bold"> Create new account! </h1>
                 <p className="text-muted-foreground text-balance"> Welcome to our community ^^ </p>
@@ -147,7 +147,7 @@ export function SignupForm({
 
               <div className="text-center text-sm">
                 Already have account? {" "}
-                <a href="/signin"
+                <a href="/"
                   className="underline underline-offset-4">
                   Sign in
                 </a>
@@ -155,18 +155,18 @@ export function SignupForm({
 
             </div>
           </form>
-          <div className="relative hidden bg-muted md:block">
+          <div className="relative hidden bg-muted md:block overflow-hidden bg-white">
             <img
               src="/placeholderSignUp.png"
               alt="Image"
-              className="absolute top-1/2 -translate-y-1/2 object-cover"
+              className="absolute inset-0 w-full h-full object-contain"
             />
           </div>
         </CardContent>
       </Card>
       <div className="text-xs text-balance px-6 text-center *:[a]:hover:text-primary text-muted-foreground *:[a]:underline *:[a]:underline-offetset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our <a href="/terms">Terms of Service</a>{" "}
+        and <a href="/privacy">Privacy Policy</a>.
       </div>
     </div>
   );

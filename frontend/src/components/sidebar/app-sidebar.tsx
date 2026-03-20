@@ -41,16 +41,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" className="bg-gradient-primary" render={<a href="#" />}>
             
                 <div className="flex w-full items-center px-2 justify-between">
-                  <h1 className="text-xl font-bold text-white"> Talkify </h1>
+                  <h1 className="text-xl font-bold text-black"> Talkify </h1>
                   <div className="flex items-center gap-2">
-                  <Sun className="size-4 text-white/80" />
+                  <Sun className="size-4 text-black/80" />
                   
                     <Switch
                       checked={isDark}
                       onCheckedChange={toggleTheme}
                       className="data-[state=checked]:bg-background/80" // khi switch ở trạng thái tắt, đổi màu nền tối nhẹ 80
                     />
-                    <Moon className="size-4 text-white/80"/>
+                    <Moon className="size-4 text-black/80" />
                   </div>
                 </div>
            

@@ -1,6 +1,7 @@
 import Conversation from "../models/Conversation.js"
 import Message from "../models/Message.js"
 import { io } from "../socket/index.js";
+import User from "../models/User.js";
 
 export const createConversation = async (req, res) => {
     try {
@@ -92,8 +93,11 @@ export const createConversation = async (req, res) => {
 export const getConversation = async (req, res) => {
     try {
         const userId = req.user._id;
+        const userIdStr = userId.toString();
+
         const conversations = await Conversation.find({
-            "participants.userId": userId
+            "participants.userId": userId,
+            deletedBy: { $ne: req.user._id }
         })
             .sort({ lastMessageAt: -1, updatedAt: -1 })
             .populate({
@@ -108,8 +112,28 @@ export const getConversation = async (req, res) => {
                 path: "seenBy",
                 select: "displayName avatarUrl"
             });
-        
-        // duyệt qua từng cuộc trò chuyện, tạo 1 mảng, trong mảng là các thông tin đã format lại để front end dễ dùng hơn
+
+        const allParticipantIds = Array.from(
+            new Set(
+                conversations.flatMap((c) =>
+                    (c.participants || []).map((p) =>
+                        p.userId?._id?.toString() || p.userId?.toString()
+                    )
+                )
+            )
+        ).filter(Boolean);
+
+        const users = await User.find({ _id: { $in: allParticipantIds } })
+            .select("_id blockedUsers")
+            .lean();
+
+        const blockedMap = new Map(
+            users.map((u) => [
+                u._id.toString(),
+                new Set((u.blockedUsers || []).map((id) => id.toString()))
+            ])
+        );
+
         const formatted = conversations.map((convo) => {
             const participants = (convo.participants || []).map((p) => ({
                 _id: p.userId?._id,
@@ -118,16 +142,64 @@ export const getConversation = async (req, res) => {
                 joinedAt: p.joinedAt
             }));
 
+            const convoObj = convo.toObject();
+
+            const lastMessage = convo.lastMessage
+                ? {
+                    _id: convo.lastMessage._id,
+                    content: convo.lastMessage.content ?? null,
+                    imgUrl: convo.lastMessage.imgUrl ?? null,
+                    createdAt: convo.lastMessage.createdAt ?? null,
+                    senderId:
+                        convo.lastMessage.senderId?._id ||
+                        convo.lastMessage.senderId ||
+                        null,
+                    sender: convo.lastMessage.senderId
+                        ? {
+                            _id: convo.lastMessage.senderId._id,
+                            displayName: convo.lastMessage.senderId.displayName ?? "",
+                            avatarUrl: convo.lastMessage.senderId.avatarUrl ?? null
+                        }
+                        : null
+                }
+                : null;
+
+            let isBlocked = false;
+            let isBlockedByMe = false;
+            let isBlockedByOther = false;
+
+            if (convo.type === "direct") {
+                const other = participants.find(
+                    (p) => p._id?.toString() !== userIdStr
+                );
+                const otherId = other?._id?.toString();
+
+                if (otherId) {
+                    const myBlocked = blockedMap.get(userIdStr) || new Set();
+                    const theirBlocked = blockedMap.get(otherId) || new Set();
+
+                    isBlockedByMe = myBlocked.has(otherId);
+                    isBlockedByOther = theirBlocked.has(userIdStr);
+                    isBlocked = isBlockedByMe || isBlockedByOther;
+                }
+            }
+
             return {
-                ...convo.toObject(), // chuyển mongoose docu thành đối tượng js
-                unreadCounts: convo.unreadCounts || {},
+                ...convoObj,
+                lastMessage,
+                isBlocked,
+                isBlockedByMe,
+                isBlockedByOther,
+                unreadCounts: Object.fromEntries(convoObj.unreadCounts || new Map()),
+                nicknames: Object.fromEntries(convoObj.nicknames || new Map()),
                 participants
             };
         });
+
         return res.status(200).json({ conversations: formatted });
     } catch (error) {
         console.error("Error to get conversations", error);
-        return res.status(500).json({ message: "System error." })
+        return res.status(500).json({ message: "System error." });
     }
 };
 
@@ -187,18 +259,18 @@ export const markAsSeen = async (req, res) => {
         const conversation = await Conversation.findById(conversationId).lean();
 
         if (!conversation) {
-            return res.status(404).json({message: "Conversation is not exist."})
+            return res.status(404).json({ message: "Conversation is not exist." })
         }
 
         // nếu có conversation, lấy tin nhắn cuối cùng của convo ra
         const last = conversation.lastMessage;
 
         if (!last) {
-            return res.status(200).json({message: "No messages to mark as seen."})
+            return res.status(200).json({ message: "No messages to mark as seen." })
         }
 
         if (last.senderId.toString() === userId) {
-            return res.status(200).json({message: "Sender does not need to mark as seen."})
+            return res.status(200).json({ message: "Sender does not need to mark as seen." })
         }
 
         // update số tin nhắn chưa đọc về 0 khi user đã đọc tin nhắn
@@ -218,6 +290,7 @@ export const markAsSeen = async (req, res) => {
             lastMessage: {
                 _id: updated?.lastMessage._id,
                 content: updated?.lastMessage.content,
+                imgUrl: updated?.lastMessage.imgUrl ?? null,
                 createdAt: updated?.lastMessage.createdAt,
                 sender: {
                     _id: updated?.lastMessage.senderId,
@@ -232,6 +305,87 @@ export const markAsSeen = async (req, res) => {
         })
     } catch (error) {
         console.error("Error to mark as seen.", error);
-        return res.status(500).json({message: "System error."})
+        return res.status(500).json({ message: "System error." })
+    }
+};
+
+export const renameConversation = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const { newName, targetUserId } = req.body;
+
+        console.log("=== RENAME DEBUG ===");
+        console.log("conversationId:", conversationId);
+        console.log("newName:", newName);
+        console.log("targetUserId:", targetUserId);
+        console.log("req.body:", req.body);
+
+        const conversation = await Conversation.findById(conversationId);
+        console.log("Found conversation type:", conversation?.type);
+        console.log("Current nicknames:", conversation?.nicknames);
+        
+        if (!conversation) {
+            return res.status(404).json({ message: "Conversation not found." });
+        }
+
+        let updated;
+
+        if (conversation.type === "group") {
+            console.log("Updating GROUP name...");
+            updated = await Conversation.findByIdAndUpdate(
+                conversationId,
+                { $set: { "group.name": newName } },
+                { new: true }
+            );
+        } else if (conversation.type === "direct") {
+            if (!targetUserId) {
+                console.log("ERROR: targetUserId missing!");
+                return res.status(400).json({ message: "targetUserId is required for direct messages." });
+            }
+            console.log(`Updating DIRECT nickname for ${targetUserId} to "${newName}"...`);
+            updated = await Conversation.findByIdAndUpdate(
+                conversationId,
+                { $set: { [`nicknames.${targetUserId}`]: newName } },
+                { new: true }
+            );
+            console.log("After update, nicknames:", updated?.nicknames);
+        }
+
+        console.log("Updated conversation:", updated);
+
+        io.to(conversationId).emit("conversation-renamed", {
+            conversationId,
+            newName,
+            targetUserId,
+            type: conversation.type
+        });
+
+        return res.status(200).json({ message: "Renamed successfully", conversation: updated });
+    } catch (error) {
+        console.error("ERROR in renameConversation:", error);
+        return res.status(500).json({ message: "System error." });
+    }
+};
+
+export const deleteConversation = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const userId = req.user._id;
+
+        const conversation = await Conversation.findById(conversationId);
+        if (!conversation) {
+            return res.status(404).json({ message: "Conversation not found." });
+        }
+
+        // Nếu ID chưa có trong mảng thì thêm vào
+        if (!conversation.deletedBy.includes(userId)) {
+            conversation.deletedBy.push(userId);
+            await conversation.save();
+        }
+
+        return res.status(200).json({ message: "Conversation deleted successfully", conversationId });
+    } catch (error) {
+        console.error("Error to delete conversation.", error);
+        return res.status(500).json({ message: "System error." });
     }
 }

@@ -8,6 +8,8 @@ import { useThemeStore } from "./stores/useThemeStore"
 import { useEffect } from "react"
 import { useAuthStore } from "./stores/useAuthStore"
 import { useSocketStore } from "./stores/useSocketStore"
+import TermsPage from "./pages/TermsPage"
+import PrivacyPage from "./pages/PrivacyPage"
 
 function App() {
   const { isDark, setTheme } = useThemeStore();
@@ -33,7 +35,7 @@ function App() {
         <Routes>
           {/* public routes */}
           <Route
-            path="/signin"
+            path="/"
             element={<SignInPage/>} 
           />
 
@@ -42,16 +44,23 @@ function App() {
             element={<SignUpPage/>} 
           />
 
+          <Route
+            path="/terms"
+            element={<TermsPage/>}
+          />
+
+          <Route
+            path="/privacy"
+            element={<PrivacyPage />}
+          />
+
           {/* protected routes */} 
           <Route element={<ProtectedRoute/>}> 
             <Route
-              path="/"
+              path="/app"
               element={<ChatAppPage/>} 
             /> 
-          
-          </Route>  
-          
-
+          </Route>
       </Routes>
       </BrowserRouter>
       </>

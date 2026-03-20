@@ -19,19 +19,28 @@ export const chatService = {
         return { messages: res.data.messages, cursor: res.data.nextCursor }
     },
 
-    async sendDirectMessage(recipientId: string, content: string = "", imgUrl?: string, conversationId?: string) {
-        const res = await api.post("/messages/direct", {
-            recipientId, content, imgUrl, conversationId
+    async sendDirectMessage(recipientId: string, content: string = "", imageFile?: File, conversationId?: string) {
+        const formData = new FormData();
+        formData.append("recipientId", recipientId);
+        formData.append("content", content);
+        if (imageFile) formData.append("image", imageFile);
+        if (conversationId) formData.append("conversationId", conversationId);
+
+        const res = await api.post("/messages/direct", formData, {
+            headers: { "Content-Type": "multipart/form-data" }
         });
-       
         return res.data.message
     },
 
-    async sendGroupMessage(conversationId: string, content: string = "", imgUrl?: string) {
-        const res = await api.post("/messages/group", {
-            conversationId, content, imgUrl
-        });
+    async sendGroupMessage(conversationId: string, content: string = "", imageFile?: File) {
+        const formData = new FormData();
+        formData.append("conversationId", conversationId);
+        formData.append("content", content);
+        if (imageFile) formData.append("image", imageFile);
 
+        const res = await api.post("/messages/group", formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
         return res.data.message
     },
 
@@ -43,5 +52,18 @@ export const chatService = {
     async createConversation(type: "direct" | "group", name: string, memberIds: string[]) {
         const res = await api.post("/conversations", { type, name, memberIds });
         return res.data.conversation
+    },
+
+    async renameConversation(conversationId: string, newName: string, targetUserId?: string) {
+        const res = await api.patch(`/conversations/${conversationId}/rename`, {
+            newName,
+            targetUserId
+        });
+        return res.data;
+    },
+
+    async deleteConversation(conversationId: string) {
+        const res = await api.delete(`/conversations/${conversationId}/delete`);
+        return res.data;
     }
 }

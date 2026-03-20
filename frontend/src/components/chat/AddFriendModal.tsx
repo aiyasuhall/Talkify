@@ -10,25 +10,43 @@ import SendFriendRequest from "../addFriendModal/SendFriendRequest";
 
 export interface IFormValues {
   username: string;
-  message: string
-};
+  message: string;
+}
 
 const AddFriendModal = () => {
+  const [open, setOpen] = useState(false);
   const [isFound, setIsFound] = useState<boolean | null>(null);
-  const [searchUser, setSearchUser] = useState<User>();
-  const [searchedUsername, setSearchedUsername] = useState(""); // hiển thị trong UI khi báo không hoặc tìm thấy
+  const [searchUser, setSearchUser] = useState<User | undefined>(undefined);
+  const [searchedUsername, setSearchedUsername] = useState("");
+
   const { loading, searchByUsername, addFriend } = useFriendStore();
 
   const {
     register,
     handleSubmit,
     watch,
-    reset, formState: { errors }
+    reset,
+    resetField,
+    formState: { errors },
   } = useForm<IFormValues>({
-    defaultValues: { username: "", message: "" }
+    defaultValues: { username: "", message: "" },
   });
 
-  const usernameValue = watch("username"); // watch theo dõi input và lấy giá trị realtime mà không cần bấm submit
+  const usernameValue = watch("username");
+
+  const handleCancel = () => {
+    reset();
+    setSearchedUsername("");
+    setSearchUser(undefined);
+    setIsFound(null);
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      handleCancel();
+    }
+  };
 
   const handleSearch = handleSubmit(async (data) => {
     const username = data.username.trim();
@@ -39,14 +57,17 @@ const AddFriendModal = () => {
 
     try {
       const foundUser = await searchByUsername(username);
+
       if (foundUser) {
-        setIsFound(true);
         setSearchUser(foundUser);
+        setIsFound(true);
       } else {
+        setSearchUser(undefined);
         setIsFound(false);
       }
     } catch (error) {
       console.error(error);
+      setSearchUser(undefined);
       setIsFound(false);
     }
   });
@@ -54,40 +75,40 @@ const AddFriendModal = () => {
   const handleSend = handleSubmit(async (data) => {
     if (!searchUser) return;
 
-    try {
-      const message = await addFriend(searchUser._id, data.message.trim());
-      toast.success(message);
+    const intro = data.message?.trim() ?? "";
 
+    try {
+      const resultMessage = await addFriend(searchUser._id, intro);
+
+      if (!resultMessage || /error|failed|fail/i.test(resultMessage)) {
+        toast.error(resultMessage || "Failed to send friend request.");
+        return;
+      }
+
+      toast.success(resultMessage);
       handleCancel();
+      setOpen(false);
     } catch (error) {
       console.error("Error to send request from form.", error);
+      toast.error("Failed to send friend request.");
     }
   });
 
-  const handleCancel = () => {
-    reset();
-    setSearchedUsername("");
-    setIsFound(null);
-  }
-
   return (
-    <Dialog>
-      <DialogTrigger
-      nativeButton={false} 
-      render={<div />}
-      >
-        <div className="flex justify-center items-center size-5 rounded-full hover:bg-sidebar-accent cursor-pointer z-10">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger nativeButton={false} render={<div />}>
+        <div className="z-10 flex size-5 cursor-pointer items-center justify-center rounded-full hover:bg-sidebar-accent">
           <UserPlus className="size-4" />
           <span className="sr-only">Add Friend</span>
         </div>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px] border-none">
+      <DialogContent className="border-none sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle> Add Friend</DialogTitle>
+          <DialogTitle>Add Friend</DialogTitle>
         </DialogHeader>
 
-        {!isFound && <>
+        {!isFound && (
           <SearchForm
             register={register}
             errors={errors}
@@ -98,20 +119,24 @@ const AddFriendModal = () => {
             onSubmit={handleSearch}
             onCancel={handleCancel}
           />
-        </>}
+        )}
 
-        {isFound && <>
+        {isFound && (
           <SendFriendRequest
             register={register}
+            errors={errors}
             loading={loading}
             searchedUsername={searchedUsername}
             onSubmit={handleSend}
-            onBack={() => setIsFound(null)}
+            onBack={() => {
+              setIsFound(null);
+              resetField("message");
+            }}
           />
-        </>}
+        )}
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default AddFriendModal
+export default AddFriendModal;

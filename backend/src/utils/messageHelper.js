@@ -5,6 +5,7 @@ export const updateConversationAfterCreateMessage = (conversation, message, send
         lastMessage: {
             _id: message._id,
             content: message.content,
+            imgUrl: message.imgUrl ?? null,
             senderId,
             createdAt: message.createdAt
         }
@@ -18,14 +19,24 @@ export const updateConversationAfterCreateMessage = (conversation, message, send
     })
 };
 
-export const emitNewMessage = (io, conversation, message) => {
-    io.to(conversation._id.toString()).emit("new-message", {
-        message,
-        conversation: {
-            _id: conversation._id,
-            lastMessage: conversation.lastMessage,
-            lastMessageAt: conversation.lastMessageAt,
-        },
-        unreadCounts: conversation.unreadCounts,
-    })
-}
+export const emitNewMessage = (io, conversation, message, options = {}) => {
+  const { notifyUserIds = [] } = options;
+
+  const payload = {
+    message,
+    conversation: {
+      _id: conversation._id,
+      lastMessage: conversation.lastMessage,
+      lastMessageAt: conversation.lastMessageAt,
+    },
+    unreadCounts: Object.fromEntries(conversation.unreadCounts || new Map()),
+  };
+
+  // Normal path: emit to conversation room
+  io.to(conversation._id.toString()).emit("new-message", payload);
+
+  // Fallback path for first message of brand-new conversation
+  notifyUserIds.forEach((userId) => {
+    io.to(userId.toString()).emit("new-message", payload);
+  });
+};

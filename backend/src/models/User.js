@@ -44,7 +44,17 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: String,
         sparse: true // cho phép null, nhưng không được trùng
-    }
+    },
+
+    showOnlineStatus: {
+        type: Boolean,
+        default: true
+    },
+
+    blockedUsers: [{
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        default: []
+    }],
 },
     {
         timestamps: true

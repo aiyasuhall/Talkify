@@ -5,6 +5,7 @@ export const upload = multer({
     storage: multer.memoryStorage(), // lưu vào ram
     limits: {
         fieldSize: 1024 * 1024 * 1, // 1mb
+        fileSize: 1024 * 1024 * 5,
     }
 });
 
@@ -27,4 +28,11 @@ export const uploadImageFromBuffer = (buffer, options) => {
 
         uploadStream.end(buffer);
     })
+};
+
+export const uploadChatImage = (buffer) => {
+    return uploadImageFromBuffer(buffer, {
+        folder: "talkify_chat/messages",
+        transformation: [{ width: 1200, crop: "limit" }],
+    });
 }

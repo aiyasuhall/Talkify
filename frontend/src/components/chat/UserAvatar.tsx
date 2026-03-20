@@ -9,7 +9,7 @@ interface IUseAvatarProps {
 }
 
 const UserAvatar = ({ type, name, avatarUrl, className }: IUseAvatarProps) => {
-    const bgColor = !avatarUrl ? "bg-blue-500" : "";
+    const bgColor = !avatarUrl ? "bg-emerald-200" : "";
 
     if (!name) {
         name = "Talkify";
@@ -24,7 +24,7 @@ const UserAvatar = ({ type, name, avatarUrl, className }: IUseAvatarProps) => {
       )}
       >
           <AvatarImage src={avatarUrl} alt={name} />
-          <AvatarFallback className={`${bgColor} text-white font-semibold`}>
+          <AvatarFallback className={`${bgColor} text-emerald-950 font-semibold`}>
             {name.charAt(0)} {/* tạo ava có chữ cái đầu tiên của tên */}
           </AvatarFallback>
 

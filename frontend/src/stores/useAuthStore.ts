@@ -52,12 +52,13 @@ export const useAuthStore = create<AuthState>()(
       get().setAccessToken(accessToken);
 
       await get().fetchMe();
-      useChatStore.getState().fetchConversations(); // đăng nhập là sidebar có data ngay
+      await useChatStore.getState().fetchConversations(); // đăng nhập là sidebar có data ngay
 
       toast.success("Welcome back to Talkify 🎉");
     } catch (error) {
       console.error(error);
-      toast.error("Login failed!");
+      get().clearState();
+      throw error;
     } finally {
       set({ loading: false });
     }

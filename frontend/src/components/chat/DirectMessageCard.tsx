@@ -10,7 +10,7 @@ import { useSocketStore } from '@/stores/useSocketStore';
 
 const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
   const { user } = useAuthStore();
-  const { activeConversationId, setActiveConversation, messages, fetchMessages } = useChatStore();
+  const { activeConversationId, setActiveConversation, messages, fetchMessages, renameConversation, deleteConversation } = useChatStore();
   const { onlineUsers } = useSocketStore();
 
   if (!user) return null;
@@ -18,8 +18,30 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
   const otherUser = convo.participants.find((p) => p._id !== user._id);
   if (!otherUser) return null;
 
+  const displayChatName = convo.nicknames?.[otherUser._id] || otherUser.displayName || "";
+
   const unreadCount = convo.unreadCounts[user._id];
-  const lastMessage = convo.lastMessage?.content ?? ""; // ?? là không có giá trị bên trái thì xài giá trị bên phải
+  const contentText = convo.lastMessage?.content?.trim() ?? "";
+  const hasPhoto = Boolean(convo.lastMessage?.imgUrl);
+
+  const rawSenderId =
+    (convo.lastMessage as any)?.sender?._id ||
+    (typeof (convo.lastMessage as any)?.senderId === "string"
+      ? (convo.lastMessage as any).senderId
+      : (convo.lastMessage as any)?.senderId?._id) ||
+    "";
+
+  const senderDisplayName =
+    (convo.lastMessage as any)?.sender?.displayName ||
+    convo.participants.find((p) => p._id === rawSenderId)?.displayName ||
+    "";
+
+  const senderName =
+    rawSenderId === user._id
+      ? "You"
+      : (convo.nicknames?.[rawSenderId] || senderDisplayName || displayChatName);
+
+  const lastMessage = contentText || (hasPhoto ? `${senderName} sent a photo` : "");
 
   const handleSelectConversation = async (id: string) => {
     setActiveConversation(id);
@@ -31,12 +53,15 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
   return (
     <ChatCard
       convoId={convo._id}
-      name={otherUser.displayName ?? ""}
+      name={displayChatName}
       timestamp={
         convo.lastMessage?.createdAt ? new Date(convo.lastMessage.createdAt) : undefined}
       isActive={activeConversationId === convo._id}
       onSelect={handleSelectConversation}
       unreadCount={unreadCount}
+      chatType="direct"
+      onRename={(newName) => renameConversation(convo._id, newName, otherUser._id)}
+      onDelete={() => deleteConversation(convo._id)}
       leftSection={
         <>
           <UserAvatar

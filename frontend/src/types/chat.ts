@@ -20,6 +20,7 @@ export interface Group {
 export interface LastMessage {
   _id: string;
   content: string;
+  imgUrl?: string | null;
   createdAt: string;
   sender: {
     _id: string;
@@ -39,6 +40,10 @@ export interface Conversation {
   unreadCounts: Record<string, number>; // key = userId, value = unread count
   createdAt: string;
   updatedAt: string;
+  nicknames?: Record<string, string>;
+  isBlocked?: boolean;
+  isBlockedByMe?: boolean;
+  isBlockedByOther?: boolean;
 }
 
 export interface ConversationResponse {

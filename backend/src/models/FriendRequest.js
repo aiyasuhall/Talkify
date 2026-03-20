@@ -1,25 +1,38 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const friendRequestSchema = new mongoose.Schema({
+const friendRequestSchema = new mongoose.Schema(
+  {
     from: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
 
     to: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
 
     message: {
-        type: String,
-        maxlength: 300,
-    }
-}, {
-    timestamps: true
-});
+      type: String,
+      trim: true,
+      maxlength: 300, // fallback limit theo ky tu
+      validate: {
+        validator(value) {
+          if (!value) return true; // cho phep rong
+          const words = value.trim().split(/\s+/).filter(Boolean);
+          return words.length <= 40;
+        },
+        message: "A maximum of 40 words is allowed.",
+      },
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 
 friendRequestSchema.index({ from: 1, to: 1 }, { unique: true }); // from và to là duy nhất, cố gửi lời mời đến cùng 1 người mongoDB báo lỗi 
 

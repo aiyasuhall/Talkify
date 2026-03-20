@@ -37,6 +37,11 @@ const lastMessageSchema = new mongoose.Schema({
         default: null
     },
 
+    imgUrl: {
+        type: String,
+        default: null
+    },
+
     senderId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
@@ -87,6 +92,18 @@ const conversationSchema = new mongoose.Schema({
         of: Number,
         default: {}
     },
+
+    nicknames: {
+        type: Map,
+        of: String,
+        default: {}
+    },
+
+    deletedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: []
+    }]
 }, {
     timestamps: true
 });
