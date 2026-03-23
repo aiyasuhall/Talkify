@@ -158,14 +158,15 @@ export const useChatStore = create<ChatState>()(
 
       updateConversation: async (conversation) => {
         set((state) => {
-          const existing = state.conversations.find((c) => c._id === conversation._id);
+          if (!conversation || typeof conversation !== "object") return state;
 
-          if (!existing) {
-            return state;
-          }
+          const conv = conversation as { _id: string } & Record<string, unknown>;
+          const existing = state.conversations.find((c) => c._id === conv._id);
 
-          const merged = { ...existing, ...conversation };
-          const others = state.conversations.filter((c) => c._id !== conversation._id);
+          if (!existing) return state;
+
+          const merged = { ...existing, ...conv };
+          const others = state.conversations.filter((c) => c._id !== conv._id);
 
           return {
             conversations: [merged, ...others],
