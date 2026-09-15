@@ -6,7 +6,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  reporter: [
+    ['html', { outputFolder: 'playwright-report' }],
+    ['json', { outputFile: 'test-results.json' }],
+  ],
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
@@ -17,4 +20,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 });
